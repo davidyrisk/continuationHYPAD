@@ -32,7 +32,7 @@ If you use this framework/dataset, build on or find our research useful for your
 ### Installation
 To install `continuationHYPAD`, clone the repository and install using `pip`:
 ```bash
-git clone https://github.com/....git
+git clone https://github.com/davidyrisk/continuationHYPAD.git
 cd continuationHYPAD
 pip install .
 ```
