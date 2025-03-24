@@ -313,9 +313,9 @@ def solveLinearSystem(neqf, neqc, K, P):
     return D
 def oti_cross(a,b):
     c = oti.zeros((a.shape))
-    c[0,0] = a[1]*b[2]-a[2]*b[1]
-    c[1,0] = a[2]*b[0]-a[0]*b[2]
-    c[2,0] = a[0]*b[1]-a[1]*b[0]
+    c[0,0] = a[1,0]*b[2,0]-a[2,0]*b[1,0]
+    c[1,0] = a[2,0]*b[0,0]-a[0,0]*b[2,0]
+    c[2,0] = a[0,0]*b[1,0]-a[1,0]*b[0,0]
     return c
 def constantsToProfile(c, theta):
     # x = Normalize(theta)
