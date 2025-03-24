@@ -3,8 +3,3 @@ Figures/*
 MATSO/*
 TSE/*
 MC/*
-
-# Need to ingore the __pycache__ files and folder.
-__pycache__
-.ipynb_checkpoints
-
