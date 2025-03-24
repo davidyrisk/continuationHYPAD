@@ -135,16 +135,15 @@ for order in range(1,maxOrder+1):
     l_SMPL = np.zeros((timeincs, samples))
          
     # Loop through samples of Chebyshev coefficients (C)
-    for i in range(samples):
-        for j in range(timeincs):
-            # Evaluate ROMs at every solution increment
-            u_SMPL[j,i] =  u_oti_truncated[j,0].rom_eval_object(
-                [1, 2, 3, 4, 5, 6, 7, 8, 9], [C[i,0]-6e-4,C[i,1],
-                C[i,2],C[i,3],C[i,4],C[i,5],C[i,6],C[i,7],C[i,8]])
+    for j in range(timeincs):
+        # Evaluate ROMs at every solution increment
+        u_SMPL[j,:] =  u_oti_truncated[j,0].rom_eval_object(
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], [C[:,0]-6e-4,C[:,1],
+            C[:,2],C[:,3],C[:,4],C[:,5],C[:,6],C[:,7],C[:,8]])
 
-            l_SMPL[j,i] = lr_oti_truncated[j,0].rom_eval_object(
-                [1, 2, 3, 4, 5, 6, 7, 8, 9], [C[i,0]-6e-4,C[i,1],
-                C[i,2],C[i,3],C[i,4],C[i,5],C[i,6],C[i,7],C[i,8]])
+        l_SMPL[j,:] = lr_oti_truncated[j,0].rom_eval_object(
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], [C[:,0]-6e-4,C[:,1],
+            C[:,2],C[:,3],C[:,4],C[:,5],C[:,6],C[:,7],C[:,8]])
 
     # Save to list
     U_HP_perorder.append(u_SMPL)
@@ -175,8 +174,8 @@ if showDistr:
     for i in range(C.shape[1]):
         mx = np.mean(C[:, i])
         
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif',size=15)
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='serif',size=15)
         ax = axes.flatten()[i]
         ax.hist(C[:, i], bins=30, density=True, color=ColorFill, edgecolor=ColorEdge)
         ax.axvline(mx, linestyle="--", color=ColorEdge, linewidth=lw)
@@ -241,8 +240,8 @@ for order in range(1, maxOrder + 1):
     if showFigs:
         # Create figure
         fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif',size=18)
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='serif',size=18)
 
         # Monte-Carlo UQ Plot
         for i in range(cutoff_samples):
