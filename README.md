@@ -36,6 +36,7 @@ git clone https://github.com/davidyrisk/continuationHYPAD.git
 cd continuationHYPAD
 conda env create -f env.yml
 conda activate pyoti-env
+conda develop .
 ```
 
 ### Requirements
