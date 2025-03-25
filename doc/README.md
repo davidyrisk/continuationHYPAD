@@ -1,7 +1,9 @@
 # Instructions to build the continuationHYPAD website:
 
+1. Install requirements from `requirements.txt`
+	- ```pip install -r requirements.txt```
 
-1. Clone two branches of the repository in two directiories, as follows:
+2. Clone two branches of the repository in two directiories, as follows:
 
 	- ```folder/continuationHYPAD-main``` Contains the main branch.
 	- ```folder/continuationHYPAD-gh-pages``` Contains the gh-pages branch (Important!).
