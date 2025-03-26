@@ -2,6 +2,35 @@ import numpy as np
 import pyoti.sparse as oti
 
 def updRefConfiguration(nel, angle, fi, U, n1, n2, dof, x, y):
+    '''
+    Computes updated element lengths, angles, and internal forces for use in updated reference configurations.
+    
+    Parameters:
+    -----------
+    nel : integer
+        Number of elements
+    angle : oti.array
+        Element angles
+    fi : oti.array
+        Internal force vector
+    U : oti.array
+        Displacement vector
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+
+    Returns:
+    --------
+    L_1 : oti.array
+        Updated element lengths
+    angle_1 : oti.array
+        Updated element angles
+    fi_1 : oti.array
+        Updated internal forces
+    '''
     L_1     = oti.zeros((1,nel))
     fi_1    = oti.zeros((6,nel))
     angle_1 = oti.zeros((1,nel))
@@ -12,7 +41,43 @@ def updRefConfiguration(nel, angle, fi, U, n1, n2, dof, x, y):
         fi_1[:, i]    = fi[:, i]
     return L_1, angle_1, fi_1
 def tangStiffMtxUL(neq, nel, U, n1, n2, dof, x, y, E, A, I, fi, gle, formulation):
-    # Ke = oti.zeros((6, 6, nel))
+    '''
+    Computes the tangent stiffness matrix by assembling the elastic and geometric stiffness matrices for all elements
+
+    Parameters:
+    -----------
+    neq : integer
+        Number of equations
+    nel : integer
+        Number of elements
+    U : oti.array
+        Displacement vector
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+    E : oti.array
+        Young's Modulus of each element
+    A : oti.array
+        Cross section area of each element
+    I : oti.array
+        Cross section second moment of area of each element
+    fi : oti.array
+        Internal force vector
+    gle : oti.array
+        Elemental gather vectors (gather array)
+    formulation : str
+        Type of structural formulation ("frame", "shell", etc.).
+
+    Returns:
+    --------
+    Kt : oti.array
+        Global tangent stiffness matrix
+    Ke : list
+        List of  elastic stiffness matrices 
+    '''
     Ke = []
     Kt = oti.zeros((neq, neq))
     for i in range(nel):
@@ -49,7 +114,34 @@ def tangStiffMtxUL(neq, nel, U, n1, n2, dof, x, y, E, A, I, fi, gle, formulation
                 Kt[int(gle[i, m]), int(gle[i, n])] += k[m, n]
     return Kt, Ke
 def elasticStiffMtxUL(i, U, n1, n2, dof, x, y, E, A, I, formulation):
-    
+    '''
+    Computes the tangent stiffness matrix by assembling the elastic and geometric stiffness matrices for all elements
+
+    Parameters:
+    -----------
+    i : integer
+        Element index
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+    E : oti.array
+        Young's Modulus of each element
+    A : oti.array
+        Cross section area of each element
+    I : oti.array
+        Cross section second moment of area of each element
+    formulation : str
+        Type of structural formulation ("frame", "shell", etc.).
+
+    Returns:
+    --------
+    ke : oti.array
+        Elemental elastic stiffness matrix
+    '''
+
     # Element properties
     EA = E * A
     L = elemLength(i, U, n1, n2, dof, x, y)
@@ -85,6 +177,36 @@ def elasticStiffMtxUL(i, U, n1, n2, dof, x, y, E, A, I, formulation):
 
     return ke
 def geometricStiffMtxUL(i, U, n1, n2, dof, x, y, A, I, fi, formulation):
+    '''
+    Computes the geometric stiffness matrix considering axial and moment contributions
+
+    Parameters:
+    -----------
+    i : integer
+        Element index
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+    E : oti.array
+        Young's Modulus of each element
+    A : oti.array
+        Cross section area of each element
+    I : oti.array
+        Cross section second moment of area of each element
+    fi : oti.array
+        Internal force vector
+    formulation : str
+        Type of structural formulation ("frame", "shell", etc.).
+
+    Returns:
+    --------
+    kg : oti.array
+        Elemental geometric stiffness matrix
+    '''
+
     # Element properties
     L = elemLength(i, U, n1, n2, dof, x, y)
 
@@ -149,6 +271,52 @@ def geometricStiffMtxUL(i, U, n1, n2, dof, x, y, A, I, fi, formulation):
     kg = kg1 + kg2
     return kg
 def intForcesUL(neq, nel, U, D_U, update_angle, n1, n2, dof, x, y, gle, fi_1, angle_1, L_1, Ke):
+    '''
+    Computes internal forces considering rigid body rotation and stiffness contributions.
+    
+    Parameters:
+    -----------
+    neq : integer
+        Number of equations
+    nel : integer
+        Number of elements
+    angle : oti.array
+        Element angles
+    fi : oti.array
+        Internal force vector
+    U : oti.array
+        Displacement vector
+    D_U : oti.array
+        Displacement incremental vector
+    update_angle : boolean
+        Logical flag used to reset the angle array
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+    gle : oti.array
+        Elemental gather vectors (gather array)
+    fi_1 : oti.array
+        Internal force vector
+    angle_1 : oti.array
+        Internal force vector
+    L_1 : oti.num
+        Current length
+    Ke : list
+        List of elastic stiffness matrices
+
+    Returns:
+    --------
+    F : oti.array
+        Global force vector
+    fi : oti.array
+        Updated internal forces
+    angle : oti.array
+        Updated angular orientation
+    '''
+
     # Initialize global vector of internal forces
     F  = oti.zeros((neq,1))
     fi = oti.zeros((6, nel))
@@ -206,20 +374,99 @@ def intForcesUL(neq, nel, U, D_U, update_angle, n1, n2, dof, x, y, gle, fi_1, an
             F[int(gle[i, m]), 0] += fg[m, 0]        
     return F, fi, angle
 def predictedIncrement(neqf, s, J, Pref, D_lr, D_U, d_Ut):
+    '''
+    Computes a load increment based on previous displacements using an arc-length method.
+    
+    Parameters:
+    -----------
+    neqf : float
+        Number of free equations
+    s : float
+        Sign of increment in angle
+    J : float
+        Arc-length constant
+    Pref : oti.array
+        Reference force vector
+    D_U : oti.array
+        Total displacement incremental vector
+    D_Ut : oti.array
+        Total tangent displacement increment
+    update_angle : boolean
+        Logical flag used to reset the angle array
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+    gle : oti.array
+        Elemental gather vectors (gather array)
+    fi_1 : oti.array
+        Internal force vector
+    angle_1 : oti.array
+        Internal force vector
+    L_1 : oti.num
+        Current length
+    Ke : list
+        List of elastic stiffness matrices
+
+    Returns:
+    --------
+    d_lr : oti.num
+        Linear correction for load ratio increment 
+    '''
     Pref = Pref[:neqf]
     D_U  = D_U[:neqf]
     d_Ut = d_Ut[:neqf]
-    # d_lr = J * np.sqrt((D_U.T @ D_U + D_lr**2 * (Pref.T @ Pref)) / (d_Ut.T @ d_Ut + Pref.T @ Pref))
     d_lr = J * ((oti.dot(oti.transpose(D_U), D_U) + D_lr**2 * (oti.dot(oti.transpose(Pref), Pref))) / (oti.dot(oti.transpose(d_Ut), d_Ut) + oti.dot(oti.transpose(Pref), Pref)))**0.5
     d_lr = s * d_lr
     return d_lr
 def correctedIncrement(neqf, d_Ut, d_Ur):
+    '''
+    Uses the residual displacement correction to update the load increment.
+    
+    Parameters:
+    -----------
+    neqf : integer
+        Number of free equations
+    d_Ut : float
+        Iterative correction for tangent displacement increment
+    d_Ur : float
+        Iterative correction for residual displacement increment
+
+    Returns:
+    --------
+    d_lr : oti.num
+        Iterative correction for load ratio increment 
+    '''
     d_Ut = d_Ut[:neqf]
     d_Ur = d_Ur[:neqf]
     # d_lr = -(d_Ut.T @ d_Ur) / (d_Ut.T @ d_Ut)
     d_lr = -oti.dot(oti.transpose(d_Ut), d_Ur) / oti.dot(oti.transpose(d_Ut), d_Ut)
     return d_lr
 def elemLength(i, U, n1, n2, dof, x, y):
+    '''
+    Computes the length of an element considering displacements.
+    
+    Parameters:
+    -----------
+    i : integer
+        Element index
+    U : oti.array
+        Displacement vector
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+
+    Returns:
+    --------
+    L : oti.num
+        Current length, Euclidean distance between nodes
+    '''
+
     # Element nodes
     N1 = int(n1[i])
     N2 = int(n2[i])
@@ -234,6 +481,28 @@ def elemLength(i, U, n1, n2, dof, x, y):
     L  = (dX**2 + dY**2)**0.5
     return L
 def elemAngle(i, U, n1, n2, dof, x, y):
+    '''
+    Computes the orientation of an element.
+    
+    Parameters:
+    -----------
+    i : integer
+        Element index
+    U : oti.array
+        Displacement vector
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+
+    Returns:
+    --------
+    angle : oti.num
+        Current orientation of beam element
+    '''
+
     N1 = int(n1[i])
     N2 = int(n2[i])
     X1 = x[N1,0] + U[int(dof[N1, 0]),0]
@@ -250,6 +519,30 @@ def elemAngle(i, U, n1, n2, dof, x, y):
     angle.set_deriv(real_angle, 0)
     return angle
 def elemAngleIncr(i, U, d_U, n1, n2, dof, x, y):
+    '''
+    Computes the rigid body rotation increment for an element.
+    
+    Parameters:
+    -----------
+    i : integer
+        Element index
+    U : oti.array
+        Displacement vector
+    d_U : oti.array
+        Displacement increment vector
+    n1, n2 : np.array
+        Element connectivity arrays
+    dof : np.array
+        Degrees of freedom mapping
+    x, y : oti.array
+        Nodal coordinates
+
+    Returns:
+    --------
+    ang_incr : oti.num
+        Increment of angle due to deformation
+    '''
+
     # Displacements on previous configuration
     U_0 = U - d_U
 
@@ -288,7 +581,6 @@ def elemAngleIncr(i, U, d_U, n1, n2, dof, x, y):
 
     # Increment of angle
     dir = oti_cross(vx_0, vx_1)
-    # ang_incr = np.arctan2(np.linalg.norm(dir), np.dot(vx_0, vx_1))
     real_angle = np.arctan2(oti.norm(dir).real, oti.dot_product(vx_0, vx_1).real)
     ang_incr = oti.atan(oti.norm(dir)/oti.dot_product(vx_0, vx_1))
     ang_incr.set_deriv(real_angle, 0)
@@ -298,11 +590,47 @@ def elemAngleIncr(i, U, d_U, n1, n2, dof, x, y):
     ang_incr = s * ang_incr
     return ang_incr
 def checkSingularMtx(neqf, K):
+    '''
+    Checks if the real part of a stiffness matrix is singular by evaluating its condition number.
+
+    Parameters:
+    -----------
+    neqf : integer
+        Number of free equations
+    K : oti.array
+        Stiffness matrix to be evaluated
+    
+    Returns:
+    --------
+    singular : boolean
+        Boolean flag indicating if the matrix is singular.
+    '''
+
     singular = 0
     if np.linalg.cond(K[:neqf, :neqf].real) < 10e-12:
         singular = 1
     return singular
 def solveLinearSystem(neqf, neqc, K, P):
+    '''
+    Solves the linear system using a partitioned stiffness matrix approach.
+
+    Parameters:
+    -----------
+    neqf : integer
+        Number of free equations
+    neqc : integer
+        Number of constrained equations
+    K : oti.array
+        Stiffness matrix
+    P : oti.array
+        Force vector
+    
+    Returns:
+    --------
+    D : oti.array
+        Displacement increment
+    '''
+
     Kff = K[:neqf, :neqf]
     Pf  = P[:neqf, 0]
     Ds  = oti.zeros((neqc,1))
@@ -312,13 +640,42 @@ def solveLinearSystem(neqf, neqc, K, P):
     D[neqf:, 0] = Ds
     return D
 def oti_cross(a,b):
+    '''
+    Computes the 3D cross product of two vectors.
+
+    Parameters:
+    -----------
+    a, b : oti.array
+        Two 3x1 vectors
+    
+    Returns:
+    --------
+    c : oti.array
+        Resultant 3x1 vector from cross product, c = a x b
+    '''
     c = oti.zeros((a.shape))
     c[0,0] = a[1,0]*b[2,0]-a[2,0]*b[1,0]
     c[1,0] = a[2,0]*b[0,0]-a[0,0]*b[2,0]
     c[2,0] = a[0,0]*b[1,0]-a[1,0]*b[0,0]
     return c
 def constantsToProfile(c, theta):
-    # x = Normalize(theta)
+    '''
+     Uses Chebyshev polynomials to generate a smooth imperfection profile from coefficients.
+
+    Parameters:
+    -----------
+    c : oti.array
+        Chebyshev coefficients
+    theta : oti.array
+        Spatial coordinate, domain of Chebyshev polynomial
+    
+    Returns:
+    --------
+    y : oti.array
+        Reconstructed imperfection profile from input Chebyshev coefficients
+    '''
+
+    # Normalization of Chebyshev domain
     a = np.min(theta.real)
     b = np.max(theta.real)
     x = (2 * (theta - a) / (b - a)) - 1
