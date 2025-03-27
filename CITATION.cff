@@ -1,32 +1,20 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "Lisa"
-  given-names: "Mona"
-  orcid: "https://orcid.org/0000-0000-0000-0000"
-- family-names: "Bot"
-  given-names: "Hew"
-  orcid: "https://orcid.org/0000-0000-0000-0000"
-title: "My Research Software"
-version: 2.0.4
-doi: 10.5281/zenodo.1234
-date-released: 2017-12-18
-url: "https://github.com/github-linguist/linguist"
-preferred-citation:
-  type: article
-  authors:
-  - family-names: "Lisa"
-    given-names: "Mona"
-    orcid: "https://orcid.org/0000-0000-0000-0000"
-  - family-names: "Bot"
-    given-names: "Hew"
-    orcid: "https://orcid.org/0000-0000-0000-0000"
-  doi: "10.0000/00000"
-  journal: "Journal Title"
-  month: 9
-  start: 1 # First page number
-  end: 10 # Last page number
-  title: "My awesome research software"
-  issue: 1
-  volume: 1
-  year: 2025
+- family-names: "Risk-Mora"
+  given-names: "David Y."
+  orcid: "https://orcid.org/0000-0002-7004-408X"
+- family-names: "Aristizabal"
+  given-names: "Mauricio"
+  orcid: "https://orcid.org/0000-0003-4880-0093"
+- family-names: "Millwater"
+  given-names: "Harry"
+  orcid: "https://orcid.org/0000-0001-7097-9283"
+- family-names: "Restrepo"
+  given-names: "David"
+  orcid: "https://orcid.org/0000-0001-5462-5434"
+title: "continuationHYPAD"
+version: 0.1
+doi: "n/a"
+date-released: 2025-03-27
+url: "https://github.com/davidyrisk/continuationHYPAD"
