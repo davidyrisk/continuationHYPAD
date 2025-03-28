@@ -1,24 +1,19 @@
 # continuationHYPAD
-
-## Paper and Contributers
 Developed by David Y. Risk-Mora and collaborators. 
-See our published paper:
-1. <a href="https://.../doi/..." style="color:#268cd7"> **David Y. Risk-Mora**, Mauricio Aristizabal, Harry Millwater, David Restrepo, "*Efficient Uncertainty Quantification for Critical Buckling Loads and Determination of Knockdown Factors in Nonlinear Structures*", n/a, n/a, (2025).</a>
 
 ### Citation
 If you use this framework/dataset, build on or find our research useful for your work please cite as, 
 ```
-@article{EfficientCriticalBucklingLoadUQ_2025,
-  title={Efficient Uncertainty Quantification for Critical Buckling Loads and Determination of Knockdown Factors in Nonlinear Structures},
-  author={Risk-Mora, David Y and Aristizabal, Mauricio and Millwater, Harry and Restrepo, David},
-  journal={n/a},
-  volume={n/a},
-  number={n/a},
-  pages={n/a},
-  year={2025},
-  publisher={n/a}
+@misc{Risk-Mora2025continuationHYPAD,
+  author       = {Risk‑Mora, David Y. and Aristizabal, Mauricio and Millwater, Harry and Restrepo, David},
+  title        = {continuationHYPAD},
+  year         = {2025},
+  month        = {Mar},
+  day          = {27},
+  version      = {0.1},
+  howpublished = {\url{https://github.com/davidyrisk/continuationHYPAD}},
+  note         = {GitHub repository}
 }
-
 ```
 
 ## Overview
